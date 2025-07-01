@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"cl.ucn.modelo","l":"Customer"},{"p":"cl.ucn.modelo","l":"DiscountLog"},{"p":"cl.ucn.modelo","l":"LoyaltyDiscountEngine"},{"p":"cl.ucn.modelo","l":"Customer.LoyaltyLevel"},{"p":"cl.ucn.interfaz","l":"Main"}];updateSearchResults();
