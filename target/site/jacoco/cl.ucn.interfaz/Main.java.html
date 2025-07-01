@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Archetype - LaboratorioIII-2025</a> &gt; <a href="index.source.html" class="el_package">cl.ucn.interfaz</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">package cl.ucn.interfaz;
+
+import cl.ucn.modelo.Customer;
+import cl.ucn.modelo.LoyaltyDiscountEngine;
+import cl.ucn.modelo.DiscountLog;
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * Clase principal que contiene la interfaz de línea de comandos para gestionar clientes,
+ * aplicar descuentos y visualizar logs. Usa JPA para interactuar con la base de datos.
+ */
+<span class="nc" id="L16">public class Main {</span>
+
+    /**
+     * Scanner para lectura de entrada desde consola.
+     */
+<span class="nc" id="L21">    private static final Scanner scanner = new Scanner(System.in);</span>
+
+    /**
+     * Fábrica de EntityManager para la unidad de persistencia &quot;shopping&quot;.
+     */
+<span class="nc" id="L26">    private static EntityManagerFactory emf = Persistence.createEntityManagerFactory(&quot;shopping&quot;);</span>
+
+    /**
+     * EntityManager para operaciones sobre entidades.
+     */
+<span class="nc" id="L31">    private static EntityManager em = emf.createEntityManager();</span>
+
+    /**
+     * Motor de cálculo de descuentos para clientes.
+     */
+<span class="nc" id="L36">    private static LoyaltyDiscountEngine discountEngine = new LoyaltyDiscountEngine(em);</span>
+
+    /**
+     * Punto de entrada del programa. Muestra un menú iterativo para gestionar clientes,
+     * aplicar descuentos, actualizar datos y visualizar logs.
+     *
+     * @param args argumentos de línea de comandos (no utilizados).
+     */
+    public static void main(String[] args) {
+<span class="nc" id="L45">        System.out.println(&quot;=== SISTEMA DE CLIENTES Y DESCUENTOS ===&quot;);</span>
+        int opcion;
+        do {
+<span class="nc" id="L48">            mostrarMenu();</span>
+<span class="nc" id="L49">            opcion = Integer.parseInt(scanner.nextLine().trim());</span>
+<span class="nc bnc" id="L50" title="All 8 branches missed.">            switch (opcion) {</span>
+<span class="nc" id="L51">                case 1 -&gt; crearCliente();</span>
+<span class="nc" id="L52">                case 2 -&gt; listarClientes();</span>
+<span class="nc" id="L53">                case 3 -&gt; aplicarDescuento();</span>
+<span class="nc" id="L54">                case 4 -&gt; verLogs();</span>
+<span class="nc" id="L55">                case 5 -&gt; actualizarCliente();</span>
+<span class="nc" id="L56">                case 6 -&gt; eliminarCliente();</span>
+<span class="nc" id="L57">                case 0 -&gt; System.out.println(&quot;Saliendo...&quot;);</span>
+<span class="nc" id="L58">                default -&gt; System.out.println(&quot;❌ Opción inválida.&quot;);</span>
+            }
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        } while (opcion != 0);</span>
+
+<span class="nc" id="L62">        em.close();</span>
+<span class="nc" id="L63">        emf.close();</span>
+<span class="nc" id="L64">    }</span>
+
+    /**
+     * Muestra el menú principal de opciones al usuario.
+     */
+    private static void mostrarMenu() {
+<span class="nc" id="L70">        System.out.println(&quot;&quot;&quot;</span>
+                
+                --- Menú ---
+                1. Crear cliente
+                2. Ver todos los clientes
+                3. Calcular descuento para cliente
+                4. Ver logs de descuento
+                5. Actualizar datos del cliente
+                6. Eliminar cliente
+                0. Salir
+                Seleccione una opción:&quot;&quot;&quot;);
+<span class="nc" id="L81">    }</span>
+
+    /**
+     * Crea un nuevo cliente a partir de los datos ingresados por el usuario y lo guarda en la base de datos.
+     */
+    private static void crearCliente() {
+<span class="nc" id="L87">        System.out.print(&quot;ID del cliente: &quot;);</span>
+<span class="nc" id="L88">        String id = scanner.nextLine();</span>
+<span class="nc" id="L89">        System.out.print(&quot;Fecha de ingreso (YYYY-MM-DD): &quot;);</span>
+<span class="nc" id="L90">        LocalDate joinDate = LocalDate.parse(scanner.nextLine());</span>
+<span class="nc" id="L91">        System.out.print(&quot;Total de órdenes: &quot;);</span>
+<span class="nc" id="L92">        int orders = Integer.parseInt(scanner.nextLine());</span>
+<span class="nc" id="L93">        System.out.print(&quot;Nivel (BASIC, SILVER, GOLD, PLATINUM): &quot;);</span>
+<span class="nc" id="L94">        Customer.LoyaltyLevel level = Customer.LoyaltyLevel.valueOf(scanner.nextLine().toUpperCase());</span>
+<span class="nc" id="L95">        System.out.print(&quot;¿Tiene promoción activa? (true/false): &quot;);</span>
+<span class="nc" id="L96">        boolean promo = Boolean.parseBoolean(scanner.nextLine());</span>
+
+<span class="nc" id="L98">        Customer c = new Customer(id, joinDate, orders, level, promo);</span>
+
+<span class="nc" id="L100">        em.getTransaction().begin();</span>
+<span class="nc" id="L101">        em.persist(c);</span>
+<span class="nc" id="L102">        em.getTransaction().commit();</span>
+<span class="nc" id="L103">        System.out.println(&quot;✅ Cliente creado.&quot;);</span>
+<span class="nc" id="L104">    }</span>
+
+    /**
+     * Muestra en pantalla todos los clientes almacenados en la base de datos.
+     */
+    private static void listarClientes() {
+<span class="nc" id="L110">        List&lt;Customer&gt; clientes = em.createQuery(&quot;SELECT c FROM Customer c&quot;, Customer.class).getResultList();</span>
+<span class="nc" id="L111">        System.out.println(&quot;\n--- Lista de Clientes ---&quot;);</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        for (Customer c : clientes) {</span>
+<span class="nc" id="L113">            System.out.printf(&quot;• ID: %s | Ingreso: %s | Órdenes: %d | Nivel: %s | Promo: %s\n&quot;,</span>
+<span class="nc" id="L114">                    c.getId(), c.getJoinDate(), c.getTotalOrders(), c.getLevel(), c.isHasActivePromo());</span>
+<span class="nc" id="L115">        }</span>
+<span class="nc" id="L116">    }</span>
+
+    /**
+     * Aplica el motor de cálculo de descuentos a un cliente existente e imprime el resultado.
+     */
+    private static void aplicarDescuento() {
+<span class="nc" id="L122">        System.out.print(&quot;ID del cliente: &quot;);</span>
+<span class="nc" id="L123">        String id = scanner.nextLine();</span>
+
+        try {
+<span class="nc" id="L126">            double descuento = discountEngine.computeDiscountById(id);</span>
+<span class="nc" id="L127">            System.out.printf(&quot;✅ Descuento aplicado: %.2f%%\n&quot;, descuento * 100);</span>
+<span class="nc" id="L128">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L129">            System.out.println(&quot;❌ Cliente no encontrado.&quot;);</span>
+<span class="nc" id="L130">        }</span>
+<span class="nc" id="L131">    }</span>
+
+    /**
+     * Lista en consola los logs de descuentos aplicados, ordenados del más reciente al más antiguo.
+     */
+    private static void verLogs() {
+<span class="nc" id="L137">        List&lt;DiscountLog&gt; logs = em.createQuery(&quot;SELECT l FROM DiscountLog l ORDER BY timestamp DESC&quot;, DiscountLog.class).getResultList();</span>
+<span class="nc" id="L138">        System.out.println(&quot;\n--- Logs de Descuentos ---&quot;);</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        for (DiscountLog l : logs) {</span>
+<span class="nc" id="L140">            System.out.printf(&quot;• Cliente: %s | Fecha: %s | Descuento: %.2f%%\n&quot;,</span>
+<span class="nc" id="L141">                    l.getCustomerId(), l.getTimestamp(), l.getDiscountApplied() * 100);</span>
+<span class="nc" id="L142">        }</span>
+<span class="nc" id="L143">    }</span>
+
+    /**
+     * Permite modificar el número de órdenes, el nivel de fidelidad o la promoción activa de un cliente.
+     */
+    private static void actualizarCliente() {
+<span class="nc" id="L149">        System.out.print(&quot;ID del cliente a actualizar: &quot;);</span>
+<span class="nc" id="L150">        String id = scanner.nextLine();</span>
+<span class="nc" id="L151">        Customer c = em.find(Customer.class, id);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (c == null) {</span>
+<span class="nc" id="L153">            System.out.println(&quot;❌ Cliente no encontrado.&quot;);</span>
+<span class="nc" id="L154">            return;</span>
+        }
+
+<span class="nc" id="L157">        System.out.print(&quot;Nuevo total de órdenes: &quot;);</span>
+<span class="nc" id="L158">        int orders = Integer.parseInt(scanner.nextLine());</span>
+<span class="nc" id="L159">        System.out.print(&quot;Nuevo nivel (BASIC, SILVER, GOLD, PLATINUM): &quot;);</span>
+<span class="nc" id="L160">        Customer.LoyaltyLevel level = Customer.LoyaltyLevel.valueOf(scanner.nextLine().toUpperCase());</span>
+<span class="nc" id="L161">        System.out.print(&quot;¿Tiene promoción activa? (true/false): &quot;);</span>
+<span class="nc" id="L162">        boolean promo = Boolean.parseBoolean(scanner.nextLine());</span>
+
+<span class="nc" id="L164">        em.getTransaction().begin();</span>
+<span class="nc" id="L165">        c.setTotalOrders(orders);</span>
+<span class="nc" id="L166">        c.setLevel(level);</span>
+<span class="nc" id="L167">        c.setHasActivePromo(promo);</span>
+<span class="nc" id="L168">        em.getTransaction().commit();</span>
+<span class="nc" id="L169">        System.out.println(&quot;✅ Cliente actualizado.&quot;);</span>
+<span class="nc" id="L170">    }</span>
+
+    /**
+     * Elimina un cliente existente de la base de datos según su ID.
+     */
+    private static void eliminarCliente() {
+<span class="nc" id="L176">        System.out.print(&quot;ID del cliente a eliminar: &quot;);</span>
+<span class="nc" id="L177">        String id = scanner.nextLine();</span>
+<span class="nc" id="L178">        Customer c = em.find(Customer.class, id);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (c == null) {</span>
+<span class="nc" id="L180">            System.out.println(&quot;❌ Cliente no encontrado.&quot;);</span>
+<span class="nc" id="L181">            return;</span>
+        }
+
+<span class="nc" id="L184">        em.getTransaction().begin();</span>
+<span class="nc" id="L185">        em.remove(c);</span>
+<span class="nc" id="L186">        em.getTransaction().commit();</span>
+<span class="nc" id="L187">        System.out.println(&quot;🗑️ Cliente eliminado.&quot;);</span>
+<span class="nc" id="L188">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

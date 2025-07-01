@@ -1,0 +1,6 @@
+cl\ucn\modelo\DiscountLog.class
+cl\ucn\modelo\LoyaltyDiscountEngine$1.class
+cl\ucn\interfaz\Main.class
+cl\ucn\modelo\Customer.class
+cl\ucn\modelo\Customer$LoyaltyLevel.class
+cl\ucn\modelo\LoyaltyDiscountEngine.class
